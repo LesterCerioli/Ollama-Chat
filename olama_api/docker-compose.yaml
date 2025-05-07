@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - OLLAMA_ORIGINS=http://localhost:3000
+      - OLLAMA_KEEP_ALIVE=5m  # Reduzido para economizar memória
+      - OLLAMA_NUM_PARALLEL=1  # Apenas 1 requisição paralela
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        limits:
+          cpus: '2'  # 2 núcleos de CPU
+          memory: 10G  # Limite de 6GB RAM
+        reservations:
+          cpus: '2'  # Mínimo 1 núcleo garantido
+          memory: 8G  # Mínimo 4GB RAM garantido
+    ulimits:
+      nproc: 32768
+      nofile:
+        soft: 16384
+        hard: 32768
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434"]
+      interval: 45s  # Intervalo maior para economizar recursos
+      timeout: 15s
+      retries: 3
+
+volumes:
+  ollama_data:
