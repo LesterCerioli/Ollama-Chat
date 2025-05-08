@@ -1,5 +1,17 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import {
+  ChatContainer,
+  Header,
+  Title,
+  MessagesContainer,
+  EmptyState,
+  MessageBubble,
+  TypingIndicator,
+  InputContainer,
+  Input,
+  Button
+} from './styles';
 
 type Message = {
   text: string;
@@ -14,7 +26,9 @@ export default function Chat() {
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   const handleSend = async () => {
@@ -88,7 +102,6 @@ export default function Chat() {
         }
       }
 
-      
       setMessages(prev => {
         const updated = [...prev];
         updated[typingIndex] = { text: fullResponse, sender: 'ollama' };
@@ -112,59 +125,42 @@ export default function Chat() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-orange-900 p-4">
-      <header className="py-2 mb-2">
-        <h1 className="text-xl font-bold text-center text-orange-100">Chat with Gemma 7B</h1>
-      </header>
+    <ChatContainer>
+      <Header>
+        <Title>Chat with Gemma 7B</Title>
+      </Header>
 
-      <div className="flex-1 overflow-y-auto p-3 bg-orange-800 rounded-lg" style={{ maxHeight: '50vh' }}>
+      <MessagesContainer>
         {messages.length === 0 && (
-          <div className="text-orange-200 text-center py-4">
-            Type a message to begin...
-          </div>
+          <EmptyState>Type a message to begin...</EmptyState>
         )}
         
         {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`p-3 rounded-lg max-w-[80%] my-1 ${
-              msg.sender === 'user'
-                ? 'bg-orange-600 text-white ml-auto'
-                : msg.sender === 'error'
-                ? 'bg-red-700 text-orange-100'
-                : msg.sender === 'typing'
-                ? 'bg-orange-700 text-orange-100'
-                : 'bg-orange-700 text-orange-100'
-            }`}
-          >
+          <MessageBubble key={index} sender={msg.sender}>
             {msg.text}
-            {msg.sender === 'typing' && (
-              <span className="ml-1 inline-block align-middle animate-pulse">|</span>
-            )}
-          </div>
+            {msg.sender === 'typing' && <TypingIndicator>|</TypingIndicator>}
+          </MessageBubble>
         ))}
         
         <div ref={messagesEndRef} />
-      </div>
+      </MessagesContainer>
 
-      <div className="flex gap-2 mt-3 bg-orange-800 p-2 rounded-lg">
-        <input
+      <InputContainer>
+        <Input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder="Type your message..."
-          className="flex-1 p-2 border border-orange-600 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange-500 bg-orange-900 text-orange-100 placeholder-orange-400 text-sm"
           disabled={isLoading}
         />
-        <button
+        <Button
           onClick={handleSend}
           disabled={isLoading}
-          className="bg-orange-600 text-white p-2 rounded-lg hover:bg-orange-500 disabled:bg-orange-800 transition-colors text-sm"
         >
           Send
-        </button>
-      </div>
-    </div>
+        </Button>
+      </InputContainer>
+    </ChatContainer>
   );
 }
