@@ -9,18 +9,18 @@ services:
     environment:
       - OLLAMA_HOST=0.0.0.0:11434
       - OLLAMA_ORIGINS=http://localhost:3000
-      - OLLAMA_KEEP_ALIVE=5m  # Reduzido para economizar memória
-      - OLLAMA_NUM_PARALLEL=1  # Apenas 1 requisição paralela
+      - OLLAMA_KEEP_ALIVE=5m  
+      - OLLAMA_NUM_PARALLEL=1  
     volumes:
       - ollama_data:/root/.ollama
     deploy:
       resources:
         limits:
-          cpus: '2'  # 2 núcleos de CPU
-          memory: 10G  # Limite de 6GB RAM
+          cpus: '2'  
+          memory: 10G  
         reservations:
-          cpus: '2'  # Mínimo 1 núcleo garantido
-          memory: 8G  # Mínimo 4GB RAM garantido
+          cpus: '2'  
+          memory: 8G  
     ulimits:
       nproc: 32768
       nofile:
@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:11434"]
-      interval: 45s  # Intervalo maior para economizar recursos
+      interval: 45s  
       timeout: 15s
       retries: 3
 
