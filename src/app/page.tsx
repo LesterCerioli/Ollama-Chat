@@ -47,9 +47,9 @@ export default function Chat() {
       setMessages(prev => {
         const updated = [...prev];
         if (updated[typingIndex]?.sender === 'typing') {
-          updated[typingIndex] = { 
-            text: 'Gemma está processando sua resposta...', 
-            sender: 'typing' 
+          updated[typingIndex] = {
+            text: 'Gemma está processando sua resposta...',
+            sender: 'typing'
           };
         }
         return updated;
@@ -73,11 +73,13 @@ export default function Chat() {
       }
 
       const reader = response.body?.getReader();
-      if (!reader) throw new Error('No reader available');
+      if (!reader) {
+        throw new Error('No reader available');
+      }
 
       let fullResponse = '';
       const decoder = new TextDecoder();
-      
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -90,7 +92,7 @@ export default function Chat() {
             const parsed = JSON.parse(line);
             const content = parsed.message?.content || parsed.response || '';
             fullResponse += content;
-            
+
             setMessages(prev => {
               const updated = [...prev];
               updated[typingIndex] = { text: fullResponse, sender: 'typing' };
@@ -112,9 +114,9 @@ export default function Chat() {
       console.error('Error:', error);
       setMessages(prev => {
         const updated = [...prev];
-        updated[typingIndex] = { 
+        updated[typingIndex] = {
           text: `ERROR: ${error instanceof Error ? error.message : 'Failed to communicate with Ollama'}`,
-          sender: 'error' 
+          sender: 'error'
         };
         return updated;
       });
@@ -134,14 +136,14 @@ export default function Chat() {
         {messages.length === 0 && (
           <EmptyState>Type a message to begin...</EmptyState>
         )}
-        
+
         {messages.map((msg, index) => (
           <MessageBubble key={index} sender={msg.sender}>
             {msg.text}
             {msg.sender === 'typing' && <TypingIndicator>|</TypingIndicator>}
           </MessageBubble>
         ))}
-        
+
         <div ref={messagesEndRef} />
       </MessagesContainer>
 
@@ -154,10 +156,7 @@ export default function Chat() {
           placeholder="Type your message..."
           disabled={isLoading}
         />
-        <Button
-          onClick={handleSend}
-          disabled={isLoading}
-        >
+        <Button onClick={handleSend} disabled={isLoading}>
           Send
         </Button>
       </InputContainer>
